@@ -25,8 +25,8 @@ Status: Belum / Draf / Selesai. Perbarui tabel ini setiap ada perubahan.
 
 | Kode | Berkas | Penanggung jawab | Status |
 |---|---|---|---|
-| BAB I | laporan/BAB1-pendahuluan.md | | Belum |
-| A1 | laporan/A1-konteks-arsitektur.md | | Belum |
+| BAB I | laporan/BAB1-pendahuluan.md | | Draf |
+| A1 | laporan/A1-konteks-arsitektur.md | | draf |
 | A2 | laporan/A2-stakeholder.md | | Belum |
 | A3 | laporan/A3-batasan.md | | Belum |
 | A4 | laporan/A4-asr.md | | Belum |
