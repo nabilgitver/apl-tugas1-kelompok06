@@ -17,7 +17,7 @@ Konteks & Keputusan Arsitektur (Pertemuan 5) serta Karakteristik Arsitektur & At
 | 2 |13020240166 | AGIM ALGIFAHRI| @agimalgifahri01-gif |A3-A4 |
 | 3 |13020240284 |TEDSUA ALAIDIN KAMARULLAH | @afif302004 |A5-B1 |
 | 4 |13020240280 |MARSHANDY RESKI SAPUTRA | @ |B2-B3 |
-| 5 |13020240348 |FERI ARDIANSYAH | @ |B4-B5  |
+| 5 |13020240348 |FERI ARDIANSYAH | @13020240348@student.umi.ac.id |B4-B5  |
 
 ## Peta berkas dan penanggung jawab
 
