@@ -7,7 +7,7 @@ Konteks & Keputusan Arsitektur (Pertemuan 5) serta Karakteristik Arsitektur & At
 | Kelompok | Bagian III – Kelompok 06 (III-6) |
 | Subsistem | Academic Management |
 | Layanan inti | Layanan magang dan studi independen (MSIB): pendaftaran, penempatan mitra, logbook, bimbingan, dan penilaian |
-| Perwakilan kelompok | [TEDSUA ALAIDIN KAMARULLAH, 13020240284] |
+| Perwakilan kelompok | [MUH NABIL ABYANSAM, 13020240164] |
 
 ## Anggota
 
