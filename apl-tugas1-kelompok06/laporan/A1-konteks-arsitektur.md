@@ -1,6 +1,10 @@
 # A1. Analisis Empat Konteks Arsitektur
 
-<!-- Penanggung jawab: [nama] -->
-<!-- Yang diminta: Tabel 4 baris (teknis, siklus hidup proyek, bisnis, profesional): kondisi subsistem pada tiap konteks dan pengaruhnya pada arsitektur. -->
-<!-- Hapus komentar ini setelah bagian selesai. -->
+Subsistem: Academic Management. Layanan inti: layanan magang dan studi independen (MSIB), yaitu pendaftaran, penempatan mitra, logbook, bimbingan, dan penilaian.
 
+| Konteks | Kondisi subsistem | Pengaruh pada arsitektur |
+|---|---|---|
+| Teknis | Layanan berjalan sebagai bagian Academic Management dan harus bertukar data dengan sistem lain: data mahasiswa dan mata kuliah dari SIAKAD kampus, akun masuk (login) kampus, serta data program dari penyelenggara MSIB di luar kampus. Pengguna mengakses lewat web, sering dari ponsel, dan mengunggah berkas seperti dokumen pendaftaran dan bukti logbook. | Integrasi dengan sistem luar dipisah dalam modul adaptor agar perubahan format data di sistem luar tidak merambat ke seluruh layanan. Diperlukan penyimpanan berkas, autentikasi terpusat, dan tampilan yang responsif di ponsel. |
+| Siklus hidup proyek | Layanan dikembangkan oleh tim kecil dengan waktu terbatas, dan kebutuhan masih dapat berubah pada tiap periode program. Fungsi dirilis bertahap, misalnya pendaftaran dan penempatan mitra lebih dulu, lalu logbook, bimbingan, dan penilaian. | Dipilih struktur modular per fungsi (pendaftaran, penempatan, logbook, bimbingan, penilaian) sehingga tiap modul dapat dibangun, diuji, dan dirilis terpisah. Arsitektur terdistribusi yang rumit dihindari pada tahap awal. |
+| Bisnis | Layanan mendukung kegiatan MSIB kampus, yaitu mahasiswa magang atau studi independen dan hasilnya dapat diakui dalam kegiatan akademik. Beban kerja memuncak pada masa pendaftaran dan pada tenggat pengisian logbook serta penilaian akhir. Anggaran infrastruktur terbatas. | Sistem harus tetap responsif saat lonjakan pengguna dan tersedia pada tenggat. Logbook dan nilai menjadi dasar pengakuan akademik, sehingga perubahan harus punya jejak (siapa mengubah apa dan kapan). Biaya hosting dijaga rendah. |
+| Profesional | Tim pengembang berpengalaman terbatas, dan pengelola layanan di kampus (unit akademik) tidak memiliki tim operasi yang besar. Data peserta, nilai, dan penilaian mitra termasuk data pribadi yang diatur dalam UU Pelindungan Data Pribadi (UU No. 27 Tahun 2022). | Dipilih teknologi umum yang dikuasai tim dan mudah dirawat. Keputusan penting didokumentasikan dalam ADR. Akses dibatasi berdasarkan peran, dan data pribadi dilindungi. |
