@@ -18,22 +18,23 @@ Kelima kelompok yang dipakai: pengguna, pemilik dan sponsor, mitra eksternal, te
 ## Peta power/interest
 
 ```mermaid
+%%{init: {"theme": "base", "themeVariables": {"quadrant1Fill": "#7C9CFF", "quadrant2Fill": "#F44336", "quadrant3Fill": "#C4C4C4", "quadrant4Fill": "#4CFF8A", "quadrant1TextFill": "#000000", "quadrant2TextFill": "#000000", "quadrant3TextFill": "#000000", "quadrant4TextFill": "#000000", "quadrantPointFill": "#000000", "quadrantPointTextFill": "#000000", "quadrantXAxisTextFill": "#000000", "quadrantYAxisTextFill": "#000000", "quadrantTitleFill": "#000000", "quadrantInternalBorderStrokeFill": "#000000", "quadrantExternalBorderStrokeFill": "#000000"}, "quadrantChart": {"chartWidth": 700, "chartHeight": 600, "pointRadius": 6, "pointLabelFontSize": 13}}}%%
 quadrantChart
     title Peta Power dan Interest layanan MSIB
-    x-axis Interest rendah --> Interest tinggi
-    y-axis Power rendah --> Power tinggi
-    quadrant-1 Manage closely
-    quadrant-2 Keep satisfied
+    x-axis Kepentingan rendah --> Kepentingan tinggi
+    y-axis Pengaruh rendah --> Pengaruh tinggi
+    quadrant-1 Manage Closely
+    quadrant-2 Keep Satisfied
     quadrant-3 Monitor
-    quadrant-4 Keep informed
-    Mahasiswa peserta: [0.92, 0.25]
-    Dosen pembimbing: [0.75, 0.4]
-    Staf unit akademik: [0.9, 0.88]
-    Pimpinan fakultas: [0.35, 0.9]
-    Mitra industri: [0.6, 0.62]
-    Tim pengembang: [0.8, 0.7]
-    Penyelenggara nasional: [0.15, 0.8]
-    Unit penjaminan mutu: [0.2, 0.4]
+    quadrant-4 Keep Informed
+    Pimpinan fakultas: [0.17, 0.82]
+    Penyelenggara MSIB nasional: [0.28, 0.68]
+    Staf unit akademik: [0.75, 0.90]
+    Tim pengembang: [0.85, 0.76]
+    Mitra industri: [0.68, 0.62]
+    Unit penjaminan mutu: [0.27, 0.30]
+    Dosen pembimbing: [0.68, 0.34]
+    Mahasiswa peserta: [0.85, 0.18]
 ```
 
 Gambar PNG untuk laporan ada di `diagram/A2-peta-power-interest.png` (sumber: `diagram/A2-peta-power-interest.drawio`).
