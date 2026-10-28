@@ -1,6 +1,6 @@
 # A5. Keputusan Arsitektur dan ADR
 
-Penanggung jawab: Tedsua Alaidi KAmarullah
+Penanggung jawab: Tedsua Alaidin KAmarullah
 
 ## Ringkasan
 
