@@ -30,8 +30,8 @@ Status: Belum / Draf / Selesai. Perbarui tabel ini setiap ada perubahan.
 | A2 | laporan/A2-stakeholder.md | | Belum |
 | A3 | laporan/A3-batasan.md | | Belum |
 | A4 | laporan/A4-asr.md | | Belum |
-| A5 | laporan/A5-keputusan-arsitektur.md dan adr/ | | Belum |
-| B1 | laporan/B1-karakteristik.md | | Belum |
+| A5 | laporan/A5-keputusan-arsitektur.md dan adr/ | | Selesai |
+| B1 | laporan/B1-karakteristik.md | | Selesai |
 | B2 | laporan/B2-atribut-terukur.md | | Belum |
 | B3 | laporan/B3-tiga-struktur.md dan diagram/ | | Belum |
 | B4 | laporan/B4-iso-25010.md | | Belum |
