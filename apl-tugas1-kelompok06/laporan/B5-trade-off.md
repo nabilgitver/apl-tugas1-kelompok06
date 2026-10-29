@@ -1,3 +1,4 @@
+Nama Penanggung Jawab  : Feri Ardiansyah
 ## B5. Analisis *Trade-off*
 
 Dalam merancang sistem, memperkuat satu karakteristik sering membuat karakteristik lain melemah [2]. Tabel B5.1 membahas tiga pasang karakteristik pendorong layanan MSIB, dampaknya, dan mana yang didahulukan.
