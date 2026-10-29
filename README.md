@@ -26,8 +26,8 @@ Status: Belum / Draf / Selesai. Perbarui tabel ini setiap ada perubahan.
 | Kode | Berkas | Penanggung jawab | Status |
 |---|---|---|---|
 | BAB I | laporan/BAB1-pendahuluan.md | | Draf |
-| A1 | laporan/A1-konteks-arsitektur.md | | draf |
-| A2 | laporan/A2-stakeholder.md | | Belum |
+| A1 | laporan/A1-konteks-arsitektur.md |Muh Nabil Abyansam | draf |
+| A2 | laporan/A2-stakeholder.md |Muh Nabil Abyansam | draft |
 | A3 | laporan/A3-batasan.md | | Belum |
 | A4 | laporan/A4-asr.md | | Belum |
 | A5 | laporan/A5-keputusan-arsitektur.md dan adr/ | | Selesai |
