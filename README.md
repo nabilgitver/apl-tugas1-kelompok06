@@ -30,8 +30,8 @@ Status: Belum / Draf / Selesai. Perbarui tabel ini setiap ada perubahan.
 | A2 | laporan/A2-stakeholder.md |Muh Nabil Abyansam | Selesai |
 | A3 | laporan/A3-batasan.md | Agim Algifahri | Selesai |
 | A4 | laporan/A4-asr.md | Agim Algifahri | Selesai |
-| A5 | laporan/A5-keputusan-arsitektur.md dan adr/ | | Selesai |
-| B1 | laporan/B1-karakteristik.md | | Selesai |
+| A5 | laporan/A5-keputusan-arsitektur.md dan adr/ | Tedsua A Kamarullah | Selesai |
+| B1 | laporan/B1-karakteristik.md | Tedsua A Kamarullah | Selesai |
 | B2 | laporan/B2-atribut-terukur.md | | Belum |
 | B3 | laporan/B3-tiga-struktur.md dan diagram/ | | Belum |
 | B4 | laporan/B4-iso-25010.md |Feri Ardiansyah | Selesai |
