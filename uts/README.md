@@ -13,7 +13,7 @@ Perancangan Arsitektur Layanan Smart Campus UMI. Batas pengumpulan: **Kamis, 12 
 
 | No | Stambuk | Nama | Akun GitHub | Bagian UTS |
 |---|---|---|---|---|
-| 1 | 13020240164 | Muh Nabil Abyansam | @nabilgitver | U1, BAB VI, penyatuan PDF |
+| 1 | 13020240164 | Muh Nabil Abyansam | @nabilgitver | U1, BAB VI, daftar pustaka, penyatuan PDF |
 | 2 | 13020240166 | Agim Algifahri | @agimalgifahri01-gif | U2 |
 | 3 | 13020240284 | Tedsua Alaidin Kamarullah | @afif302004 | U3, U4 |
 | 4 | 13020240280 | Marshandy Reski Saputra | @(isi akun GitHub) | U5 |
@@ -23,15 +23,17 @@ Perancangan Arsitektur Layanan Smart Campus UMI. Batas pengumpulan: **Kamis, 12 
 
 Status: Belum / Draf / Selesai. Perbarui tabel ini setiap ada perubahan.
 
-| Kode | Berkas | Penanggung jawab | Status |
-|---|---|---|---|
-| U1 | uts/laporan/BAB1-pendahuluan.md | Muh Nabil Abyansam | Belum |
-| U2 | uts/laporan/BAB2-skenario.md | Agim Algifahri | Belum |
-| U3–U4 | uts/laporan/BAB3-taktik-pola.md | Tedsua Alaidin Kamarullah | Belum |
-| U5 | uts/laporan/BAB4-desain.md dan uts/diagram/ | Marshandy Reski Saputra | Belum |
-| U6–U7 | uts/laporan/BAB5-evaluasi-adr.md dan uts/adr/ | Feri Ardiansyah | Belum |
-| BAB VI | uts/laporan/BAB6-penutup.md | Feri Ardiansyah | Belum |
-| Pustaka | uts/laporan/daftar-pustaka.md | Agim Algifahri | Belum |
+| Kode | Bagian | Berkas | Penanggung jawab | Status |
+|---|---|---|---|---|
+| U1 | Konteks dan ASR | uts/laporan/BAB1-pendahuluan.md | Muh Nabil Abyansam | Belum |
+| U2 | Skenario atribut kualitas | uts/laporan/BAB2-skenario.md | Agim Algifahri | Belum |
+| U3 | Taktik | uts/laporan/BAB3-U3-taktik.md | Tedsua Alaidin Kamarullah | Belum |
+| U4 | Pola | uts/laporan/BAB3-U4-pola.md | Tedsua Alaidin Kamarullah | Belum |
+| U5 | Desain dan diagram | uts/laporan/BAB4-desain.md dan uts/diagram/ | Marshandy Reski Saputra | Belum |
+| U6 | Evaluasi | uts/laporan/BAB5-U6-evaluasi.md | Feri Ardiansyah | Belum |
+| U7 | ADR | uts/laporan/BAB5-U7-adr.md dan uts/adr/ | Feri Ardiansyah | Belum |
+| BAB VI | Penutup | uts/laporan/BAB6-penutup.md | Agim Algifahri | Belum |
+| Pustaka | Daftar pustaka IEEE (min. 5) | uts/laporan/daftar-pustaka.md | Muh Nabil Abyansam | Belum |
 
 ## Laporan PDF akhir
 
@@ -40,7 +42,7 @@ Status: Belum / Draf / Selesai. Perbarui tabel ini setiap ada perubahan.
 ## Aturan kerja singkat
 
 1. Setiap anggota commit dengan **akun GitHub sendiri**.
-2. Pesan commit diawali kode bagian, contoh: `[U2] tulis tiga skenario`.
+2. Pesan commit diawali kode bagian, contoh: `[U3] tulis taktik tiap skenario`.
 3. Jalankan `git pull` sebelum mulai. Jangan `force push`. Jangan gabung commit (squash).
 4. Jangan unggah data pribadi (nama responden, nomor telepon, tangkapan layar berisi identitas, isi logbook, nilai, nama dosen/mitra).
 5. Isi `uts/lampiran/C-pembagian-tugas.md` dengan tautan commit masing-masing.
