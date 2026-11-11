@@ -1,6 +1,6 @@
 
-# BAB 5: EVALUASI [U6]
-## Evaluasi Arsitektur
+# BAB 5: EVALUASI 
+## [U6] Evaluasi Arsitektur
 
 Pada bab ini dijabarkan hasil evaluasi arsitektur subsistem *Academic Management* pada SIAKAD UMI (`siakad.umi.ac.id`) berdasarkan pohon utilitas mini, matriks trade-off berbobot, analisis metode ATAM (*Architecture Tradeoff Analysis Method*), serta ringkasan keputusan arsitektur utama. Evaluasi ini merujuk pada kerangka kerja Kazman et al. (2000) dan Bass et al. (2021) untuk memastikan konsistensi penuh dengan materi presentasi kelompok.
 
