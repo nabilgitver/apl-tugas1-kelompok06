@@ -1,4 +1,5 @@
-# BAB 2: SKENARIO [U2] Skenario Atribut Kualitas
+# BAB 2: SKENARIO 
+## [U2] Skenario Atribut Kualitas
 
 Pada bab ini dijelaskan tiga skenario atribut kualitas yang dirancang untuk mengatasi permasalahan pada subsistem *Academic Management* SIAKAD UMI (`siakad.umi.ac.id`), khususnya terkait kasus penggantian dosen pengampu menjelang kuliah perdana. Perancangan skenario mengacu pada standar *General Scenario Pattern* oleh Bass et al. (2021).
 
