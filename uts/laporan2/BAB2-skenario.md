@@ -40,4 +40,26 @@ Berikut adalah tabel ringkasan skenario atribut kualitas beserta ukuran angka (m
   1. Informasi dosen baru berhasil ditampilkan dalam waktu $\le 1$ menit setelah aplikasi dibuka ulang oleh mahasiswa.
   2. **0** tampilan informasi dosen lama yang tersisa di layar setelah sinkronisasi selesai.
 
-#### 2.2.3 Skenario
+#### 2.2.3 Skenario 3 (S3): Keamanan (*Security*)
+* **Sumber Stimulus:** Pengguna tanpa hak akses (*unauthorized user*).
+* **Stimulus:** Mencoba melakukan pengubahan data dosen pengampu pada modul Kelas-Dosen.
+* **Lingkungan (*Environment*):** Sistem operasional aktif (*online system*).
+* **Artifak:** Modul Otorisasi dan *Audit Log* (Log Perubahan).
+* **Respons:** Sistem menolak pengubahan tanpa otorisasi sah, dan hanya memproses pengubahan yang dilakukan oleh Admin Akademik dengan persetujuan Ketua Jurusan serta mencatat riwayat perubahan tersebut.
+* **Ukuran Respons (*Response Measure*):**
+  1. **100%** perubahan data dosen yang sah tercatat di dalam *Audit Trail* (mencatat aktor, timestamp, nilai lama, dan nilai baru).
+  2. **0** pengubahan data berhasil dilakukan tanpa izin/otorisasi yang sah.
+
+---
+
+### 2.3 Taktik Arsitektur yang Dipilih
+
+Untuk memenuhinya target ukuran angka pada ketiga skenario di atas, taktik arsitektur yang diterapkan adalah:
+
+1. **Publish-Subscribe / Event Bus (S1 & S2):**
+   * *Cara Kerja:* Perubahan dosen disimpan satu kali di modul utama (Kelas-Dosen), kemudian menerbitkan event `DosenDiganti` ke modul lainnya (Jadwal, KRS, Presensi, Nilai).
+   * *Harga/Consequence:* Menghasilkan *eventual consistency* dengan jeda sinkronisasi $\le 2$ menit dan alur *debugging* event yang lebih kompleks.
+
+2. **Audit Trail & Otorisasi RBAC + Persetujuan (S3):**
+   * *Cara Kerja:* Membatasi hak akses pengubahan hanya untuk Admin Akademik yang telah disetujui Ketua Jurusan, serta mencatat setiap aktivitas pengubahan data ke dalam tabel `LogPerubahan`.
+   * *Harga/Consequence:* Memerlukan alur proses pengubahan yang sedikit lebih lama serta peningkatan kebutuhan penyimpanan database untuk log.
