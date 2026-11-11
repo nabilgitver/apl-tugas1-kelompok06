@@ -30,8 +30,8 @@ Status: Belum / Draf / Selesai. Perbarui tabel ini setiap ada perubahan.
 | U3–U4 | uts/laporan/BAB3-taktik-pola.md | Tedsua Alaidin Kamarullah | Belum |
 | U5 | uts/laporan/BAB4-desain.md dan uts/diagram/ | Marshandy Reski Saputra | Belum |
 | U6–U7 | uts/laporan/BAB5-evaluasi-adr.md dan uts/adr/ | Feri Ardiansyah | Belum |
-| BAB VI | uts/laporan/BAB6-penutup.md | Muh Nabil Abyansam | Belum |
-| Pustaka | uts/laporan/daftar-pustaka.md | Muh Nabil Abyansam | Belum |
+| BAB VI | uts/laporan/BAB6-penutup.md | Feri Ardiansyah | Belum |
+| Pustaka | uts/laporan/daftar-pustaka.md | Agim Algifahri | Belum |
 
 ## Laporan PDF akhir
 
