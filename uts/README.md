@@ -27,7 +27,7 @@ Status: Belum / Draf / Selesai. Perbarui tabel ini setiap ada perubahan.
 |---|---|---|---|---|
 | U1 | Konteks dan ASR | uts/laporan/BAB1-pendahuluan.md | Muh Nabil Abyansam | draft |
 | U2 | Skenario atribut kualitas | uts/laporan/BAB2-skenario.md | Feri Ardiansyah | Selesai |
-| U3 | Taktik | uts/laporan/BAB3-U3-taktik.md | Tedsua Alaidin Kamarullah | Belum |
+| U3 | Taktik | uts/laporan/BAB3-U3-taktik.md | Tedsua Alaidin Kamarullah | Selesai |
 | U4 | Pola | uts/laporan/BAB3-U4-pola.md | Tedsua Alaidin Kamarullah | Belum |
 | U5 | Desain dan diagram | uts/laporan/BAB4-desain.md dan uts/diagram/ | Marshandy Reski Saputra | Belum |
 | U6 | Evaluasi | uts/laporan/BAB5-U6-evaluasi.md | Feri Ardiansyah | Selesai |
