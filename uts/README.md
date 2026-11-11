@@ -17,7 +17,7 @@ Perancangan Arsitektur Layanan Smart Campus UMI. Batas pengumpulan: **Kamis, 12 
 | 2 | 13020240166 | Agim Algifahri | @agimalgifahri01-gif | U2 |
 | 3 | 13020240284 | Tedsua Alaidin Kamarullah | @afif302004 | U3, U4 |
 | 4 | 13020240280 | Marshandy Reski Saputra | @(isi akun GitHub) | U5 |
-| 5 | 13020240348 | Feri Ardiansyah | @(isi akun GitHub) | U6, U7 |
+| 5 | 13020240348 | Feri Ardiansyah | 13020240348@student.umi.ac.id | U6, U7 |
 
 ## Peta berkas dan penanggung jawab
 
