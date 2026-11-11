@@ -10,4 +10,4 @@ Cara mengambil tautan: buka tab **Commits**, klik commit yang dimaksud, salin al
 | 2 | 13020240166 | Feri Ardiansyah | U2 | Tiga skenario atribut kualitas beserta ukuran angka | | |
 | 3 | 13020240284 | Tedsua Alaidin Kamarullah | U3, U4 | Taktik, dua pola, dan perbedaan gaya–pola | | |
 | 4 | 13020240280 | Marshandy Reski Saputra | U5 | Diagram konteks, arsitektur, UML, dan tiga prinsip desain | | |
-| 5 | 13020240348 | Agim Algifahri | U6, U7 | Pohon utilitas, trade-off berbobot, ATAM, dan ADR baru | | |
+| 5 | 13020240348 | Agim Algifahri | U7,BAB VI | Pohon utilitas, trade-off berbobot, ATAM, dan ADR baru | | |
