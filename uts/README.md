@@ -31,8 +31,8 @@ Status: Belum / Draf / Selesai. Perbarui tabel ini setiap ada perubahan.
 | U4 | Pola | uts/laporan/BAB3-U4-pola.md | Tedsua Alaidin Kamarullah | Selesai |
 | U5 | Desain dan diagram | uts/laporan/BAB4-desain.md dan uts/diagram/ | Marshandy Reski Saputra | Belum |
 | U6 | Evaluasi | uts/laporan/BAB5-U6-evaluasi.md | Feri Ardiansyah | Selesai |
-| U7 | ADR | uts/laporan/BAB5-U7-adr.md dan uts/adr/ | Agim Algifahri | Belum |
-| BAB VI | Penutup | uts/laporan/BAB6-penutup.md | Agim Algifahri | Belum |
+| U7 | ADR | uts/laporan/BAB5-U7-adr.md dan uts/adr/ | Agim Algifahri | Selesai |
+| BAB VI | Penutup | uts/laporan/BAB6-penutup.md | Agim Algifahri | Selesai |
 | Pustaka | Daftar pustaka IEEE (min. 5) | uts/laporan/daftar-pustaka.md | Muh Nabil Abyansam | Belum |
 
 ## Laporan PDF akhir
