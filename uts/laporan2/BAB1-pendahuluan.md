@@ -2,57 +2,59 @@
 
 ## 1.1 Ringkasan layanan
 
-Layanan inti kelompok adalah **SIAKAD UMI** (siakad.umi.ac.id) pada subsistem *Academic Management* Smart Campus UMI. Fungsi intinya adalah pengelolaan kelas dan dosen pengampu, jadwal, KRS, dan nilai. Penggunanya adalah mahasiswa, dosen, dan admin akademik. Titik rawan yang kami angkat adalah **penggantian dosen pengampu di tengah semester**, karena perubahan itu menyentuh banyak data sekaligus (jadwal, presensi, nilai, hak akses) dan banyak pihak.
+Layanan inti kelompok adalah **SIAKAD UMI** (siakad.umi.ac.id) [1] pada subsistem *Academic Management* Smart Campus UMI. Fungsi intinya adalah pengelolaan kelas, dosen pengampu, jadwal kuliah, KRS, dan nilai. Penggunanya adalah mahasiswa, dosen, admin akademik, ketua jurusan, dan staf. Titik rawan yang kami angkat adalah **penggantian dosen pengampu di detik-detik kuliah perdana**, karena perubahan itu menyentuh banyak data sekaligus (jadwal, KRS, presensi, nilai, hak input nilai) dan melibatkan banyak pihak.
 
 ## 1.2 Masalah utama dan bukti
 
-**Masalah utama:** dosen pengampu diganti secara tiba-tiba, tetapi **perubahan tidak tersebar ke seluruh data dan mahasiswa tidak diberi tahu**.
+**Masalah utama:** di detik-detik kuliah perdana, dosen pengampu diganti dengan dosen lain, tetapi **perubahan lambat tersebar ke seluruh data dan mahasiswa tidak mendapatkan notifikasi**.
 
 Dampaknya ada tiga:
-1. **Terlambat tahu:** mahasiswa baru mengetahui pergantian saat hadir di kelas.
+1. **Terlambat tahu:** mahasiswa baru mengetahui pergantian saat tiba di kelas kuliah perdana.
 2. **Data tidak sinkron:** nama dosen di jadwal, presensi, dan nilai berbeda.
-3. **Tanpa jejak:** tidak jelas siapa yang mengganti, kapan, dan atas alasan apa.
+3. **Tanpa jejak:** tidak jelas siapa yang mengganti dan kapan penggantian dilakukan.
 
 | Kode | Jenis bukti | Isi bukti | Dipakai pada |
 |---|---|---|---|
-| B-1 | Pengalaman langsung anggota kelompok (sebagai pengguna SIAKAD) | Dosen pengampu mata kuliah diganti di tengah semester; mahasiswa baru mengetahuinya saat hadir di kelas; nama dosen pada jadwal, presensi, dan nilai berbeda; tidak ada keterangan siapa dan kapan penggantian dilakukan. | 1.2, S1, S2 |
-| B-2 | Tangkapan layar SIAKAD | **[ISI: mata kuliah, semester, dan tangkapan layar jadwal/presensi/nilai yang menunjukkan dosen berbeda. Tutup NIM, nama mahasiswa, dan data pribadi lain.]** | 1.2 |
+| B-1 | Pengalaman langsung anggota kelompok sebagai pengguna SIAKAD | Pada mata kuliah Pemodelan dan Simulasi (mata kuliah wajib, semester 7), dosen pengampu diganti di detik-detik kuliah perdana. Mahasiswa baru tahu saat tiba di kelas, nama dosen di jadwal, presensi, dan nilai berbeda, dan tidak ada keterangan siapa serta kapan penggantian dilakukan. | 1.2, S1, S2 |
+| B-2 | Dokumentasi wawancara (foto) | Foto kegiatan wawancara anggota kelompok yang ditampilkan pada slide presentasi "Konteks dan Masalah Utama". Berkas: `[isi path foto di repo, mis. uts/lampiran/foto-wawancara.jpg]`. | 1.2 |
 
 *Tabel 1. Bukti masalah utama.*
 
-Kami hanya memakai pengalaman sebagai pengguna dan tidak menguji keamanan sistem kampus maupun mengambil data pribadi orang lain.
+**Batas cakupan.** Rancangan pada laporan ini menyelesaikan masalah data yang tidak sinkron dan tidak berjejak, serta memastikan dosen baru terlihat saat mahasiswa membuka ulang SIAKAD. Pemberitahuan langsung (notifikasi) ke mahasiswa belum tercakup dan menjadi pekerjaan lanjutan. Kami hanya memakai pengalaman sebagai pengguna dan dokumentasi wawancara. Kami tidak menguji keamanan sistem kampus dan tidak mengambil data pribadi orang lain.
 
 ## 1.3 Stakeholder
 
 | No | Stakeholder | Kepentingan terhadap masalah utama |
 |---|---|---|
-| 1 | Mahasiswa | Segera tahu bila dosen pengampu berganti dan melihat data yang sama di semua menu. |
-| 2 | Dosen pengampu lama | Hak akses ke kelas, presensi, dan nilai dicabut tepat waktu; penggantian tercatat jelas. |
+| 1 | Mahasiswa | Melihat dosen yang benar dan data yang sama di jadwal, presensi, dan nilai. |
+| 2 | Dosen pengampu lama | Hak akses kelas dan input nilai dicabut tepat waktu; penggantian tercatat jelas. |
 | 3 | Dosen pengampu baru | Segera mendapat akses kelas dan daftar mahasiswa untuk mengajar dan menilai. |
-| 4 | Admin akademik (prodi/fakultas) | Dapat mengganti dosen dengan mudah, sekali input, dan datanya konsisten. |
-| 5 | Tim pengembang dan pengelola TI SIAKAD | Perubahan aturan dan perawatan sistem mudah; masalah mudah dilacak. |
-| 6 | Pimpinan fakultas / penjaminan mutu | Riwayat penggantian dosen dapat diaudit. |
+| 4 | Admin akademik | Mengganti dosen cukup sekali input dan datanya konsisten di semua modul. |
+| 5 | Ketua jurusan | Menyetujui penggantian dosen dan dapat menelusuri riwayat keputusan. |
+| 6 | Tim pengelola TI SIAKAD | Perubahan dan perawatan sistem mudah; masalah mudah dilacak. |
 
 *Tabel 2. Stakeholder utama.*
 
-## 1.4 ASR dan karakteristik pendorong
+## 1.4 Karakteristik pendorong dan ASR
 
-Tiga karakteristik pendorong:
-- **K1** Konsistensi data dan ketertelusuran
-- **K2** Ketepatan pemberitahuan
-- **K3** Keamanan dan hak akses
+Tiga karakteristik pendorong, dipilih dari kebutuhan pada masalah utama [2], [3]:
+- **K1 Modifiabilitas:** perubahan dosen cukup dilakukan sekali dan menyebar ke semua modul.
+- **K2 Usability:** mahasiswa dapat melihat dosen baru dengan cepat saat membuka ulang SIAKAD.
+- **K3 Keamanan:** hanya pihak berwenang yang dapat mengganti dosen dan setiap perubahan tercatat.
 
-| ASR | Kebutuhan signifikan | Karakteristik | ISO/IEC 25010 |
-|---|---|---|---|
-| ASR-1 | Satu kali penggantian dosen tercermin konsisten pada jadwal, presensi, nilai, dan KRS; tidak ada kondisi setengah berubah. Target ≤ 1 menit. | K1 | *Reliability*, *Functional suitability* |
-| ASR-2 | Mahasiswa terdampak diberi tahu segera, dan pemberitahuan tidak hilang walau layanan pengirim gagal sementara. Target ≤ 5 menit. | K2 | *Reliability*, *Usability* |
-| ASR-3 | Setiap penggantian tercatat (siapa, kapan, dosen lama dan baru, alasan) dan catatan tidak dapat diubah. | K1 | *Security* (*accountability*) |
-| ASR-4 | Hanya admin akademik berwenang yang dapat mengganti dosen; hak dosen lama dicabut dan hak dosen baru diberikan. Target ≤ 1 menit. | K3 | *Security* |
+| ASR | Kebutuhan signifikan | Ukuran respons | Karakteristik | Skenario |
+|---|---|---|---|---|
+| ASR-1 | Menjelang kuliah perdana, admin akademik mengganti dosen pengampu; jadwal, KRS, presensi, dan hak input nilai ikut berubah di semua modul. | Sinkron ≤ 2 menit; 0 data berbeda setelah sinkron | K1 | S1 |
+| ASR-2 | Setelah dosen diganti, mahasiswa yang membuka ulang SIAKAD melihat dosen baru, bukan tampilan lama. | Dosen baru terlihat ≤ 1 menit setelah sinkron; 0 tampilan lama | K2 | S2 |
+| ASR-3 | Pengguna tanpa hak tidak dapat mengubah dosen pengampu; admin berwenang dengan persetujuan ketua jurusan melakukan perubahan yang sah, dan setiap perubahan tercatat (siapa, kapan, dosen lama, dosen baru). | 100% perubahan tercatat; 0 perubahan tanpa izin | K3 | S3 |
 
-*Tabel 3. ASR dan tiga karakteristik pendorong. Angka target adalah target rancangan dan dapat disesuaikan.*
+*Tabel 3. ASR dan tiga karakteristik pendorong. Angka target adalah target rancangan, belum diuji dengan prototipe.*
+
+ASR-1 menjawab "tidak tersebar ke seluruh data", ASR-2 menjawab "terlambat tahu" tanpa notifikasi langsung, dan ASR-3 menjawab "tanpa jejak". Ketiganya dikembangkan menjadi skenario atribut kualitas pada BAB II.
 
 ## 1.5 Bagian Tugas 1 yang diperbarui
 
-- Masalah utama dipertajam menjadi penggantian dosen pengampu yang tidak tersebar dan tidak diberitahukan.
-- ASR dirumuskan ulang menjadi ASR-1 sampai ASR-4 dengan ukuran angka, dan tiga karakteristik pendorong (K1–K3) ditetapkan.
+- Masalah utama dipertajam menjadi penggantian dosen pengampu di detik-detik kuliah perdana yang tidak tersebar dan tidak berjejak.
+- Daftar stakeholder diperluas dan dikaitkan langsung dengan masalah utama.
+- ASR dirumuskan ulang menjadi ASR-1 sampai ASR-3 dengan ukuran angka, dan tiga karakteristik pendorong (K1–K3) ditetapkan.
 - ADR dari Tugas 1 dipertahankan; ADR baru ditambahkan pada U7.
