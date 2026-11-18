@@ -162,5 +162,3 @@ Diagram Konteks menunjukkan pihak-pihak yang berinteraksi dengan sistem. Diagram
 
 Ketiga diagram tersebut menjadi dasar dalam memahami rancangan sistem agar proses penggantian dosen pengampu dapat dikelola dengan lebih terstruktur dan informasi yang ditampilkan sesuai dengan perubahan terbaru.
 ```
-
-**Catatan:** Penomoran saya buat mulai dari 2.1 sampai 2.4 mengikuti contoh yang kamu berikan. Isi diagram dan penjelasannya tetap berfokus pada tiga diagram di slide 6.
