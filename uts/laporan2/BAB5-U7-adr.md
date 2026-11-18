@@ -2,11 +2,11 @@
 
 ## 1. Pendahuluan
 
-Architecture Decision Record (ADR) merupakan dokumentasi keputusan penting dalam perancangan arsitektur perangkat lunak. ADR digunakan untuk mencatat konteks permasalahan, keputusan yang dipilih, alternatif yang dipertimbangkan, serta konsekuensi dari keputusan tersebut.
+Architecture Decision Record (ADR) merupakan dokumentasi yang mencatat keputusan penting dalam perancangan arsitektur perangkat lunak, termasuk konteks permasalahan, keputusan yang dipilih, alternatif yang dipertimbangkan, serta konsekuensi dari keputusan tersebut.
 
-Pada perancangan subsistem **Academic Management SIAKAD UMI**, terdapat dua keputusan arsitektur utama yang berfokus pada penyebaran perubahan dosen pengampu serta pengendalian dan pencatatan perubahan data akademik.
+Pada perancangan arsitektur subsistem **Academic Management SIAKAD UMI**, terdapat dua keputusan arsitektur utama yang berfokus pada penyebaran perubahan dosen pengampu serta pengendalian dan pencatatan perubahan data akademik.
 
-Kedua keputusan ini dirancang untuk mengatasi permasalahan pergantian dosen pengampu secara mendadak yang menyebabkan ketidaksinkronan data dan keterlambatan informasi kepada mahasiswa.
+Kedua keputusan tersebut dirancang untuk mengatasi permasalahan penggantian dosen pengampu menjelang perkuliahan perdana yang menyebabkan perubahan data lambat tersebar ke seluruh modul dan mahasiswa tidak mendapatkan notifikasi langsung.
 
 ---
 
@@ -17,30 +17,32 @@ Kedua keputusan ini dirancang untuk mengatasi permasalahan pergantian dosen peng
 | ID | ADR-01 |
 | Judul | Penyebaran Perubahan Dosen melalui Event |
 | Status | Diterima (Accepted) |
-| Kategori | Modifiabilitas dan Konsistensi Data |
+| Fokus | Modifiabilitas dan sinkronisasi data |
 | Pola terkait | Layered + Event-Driven |
+| Taktik | Publish-Subscribe (Event) |
 
 ### 2.1 Konteks
 
-Data dosen pengampu digunakan oleh beberapa modul dalam subsistem Academic Management, seperti data kelas, jadwal, KRS, presensi, dan nilai.
+Data dosen pengampu digunakan oleh beberapa modul dalam subsistem Academic Management, seperti modul jadwal kuliah, KRS, presensi, dan nilai.
 
-Ketika terjadi pergantian dosen pengampu, perubahan tersebut berpotensi tidak langsung tersebar ke seluruh modul. Kondisi ini dapat menyebabkan perbedaan informasi dosen antara jadwal, presensi, dan nilai.
+Ketika terjadi penggantian dosen pengampu menjelang perkuliahan perdana, perubahan data berpotensi lambat tersebar ke seluruh modul. Hal ini dapat menyebabkan ketidaksesuaian informasi dosen antara jadwal, presensi, dan nilai.
 
-Oleh karena itu, diperlukan mekanisme penyebaran perubahan yang dapat memperbarui informasi pada seluruh modul terkait tanpa harus melakukan perubahan secara manual satu per satu.
+Diperlukan mekanisme yang dapat menyebarkan perubahan secara otomatis sehingga seluruh modul terkait memperoleh informasi dosen pengampu terbaru.
 
 ### 2.2 Keputusan
 
-Menggunakan mekanisme **Publish-Subscribe (Event-Driven)** melalui event bus internal.
+Memilih mekanisme **Publish-Subscribe (Event-Driven)** menggunakan event bus internal.
 
-Ketika admin akademik melakukan perubahan dosen pengampu, sistem akan:
+Ketika admin akademik melakukan penggantian dosen pengampu yang telah memperoleh persetujuan, sistem akan menjalankan proses berikut:
 
-1. Memvalidasi perubahan dan menyimpannya ke database utama.
-2. Menerbitkan event bernama `DosenDiganti`.
-3. Mengirimkan event kepada modul yang berlangganan.
-4. Memperbarui data pada modul jadwal, KRS, presensi, dan nilai.
-5. Menampilkan informasi dosen terbaru ketika mahasiswa membuka kembali SIAKAD.
+1. Menyimpan perubahan dosen pengampu ke database utama.
+2. Mencatat perubahan ke dalam audit log.
+3. Menerbitkan event bernama `DosenDiganti`.
+4. Menyebarkan event kepada modul yang berlangganan.
+5. Memperbarui informasi pada modul jadwal, KRS, presensi, dan nilai.
+6. Menampilkan informasi dosen terbaru ketika mahasiswa membuka kembali SIAKAD.
 
-Target sinkronisasi adalah maksimal 2 menit dengan 0 perbedaan data setelah proses sinkronisasi selesai.
+Target waktu sinkronisasi adalah maksimal 2 menit dengan 0 perbedaan data setelah proses sinkronisasi selesai.
 
 ### 2.3 Alternatif yang Dipertimbangkan
 
@@ -48,21 +50,24 @@ Target sinkronisasi adalah maksimal 2 menit dengan 0 perbedaan data setelah pros
 |---|---|---|
 | Panggilan langsung antarmodul | Modul saling memanggil untuk memperbarui data | Ketergantungan antarmodul lebih tinggi |
 | Microservices | Setiap modul berjalan sebagai layanan terpisah | Kompleksitas dan biaya pengelolaan lebih tinggi |
-| Publish-Subscribe | Perubahan disebarkan melalui event | Dipilih karena modul lebih longgar dan mudah dikembangkan |
+| Publish-Subscribe | Perubahan disebarkan melalui event bus internal | Dipilih karena modul lebih longgar dan mudah dikembangkan |
 
 ### 2.4 Konsekuensi
 
 **Kelebihan:**
+
 - Ketergantungan antarmodul lebih rendah (loose coupling).
 - Perubahan dosen dapat disebarkan secara otomatis.
 - Memudahkan penambahan modul baru.
-- Mendukung konsistensi data antarbagian sistem.
+- Mendukung sinkronisasi data antarbagian sistem.
 
 **Kekurangan:**
+
 - Konsistensi data tidak selalu terjadi secara langsung (eventual consistency).
 - Terdapat jeda sinkronisasi dengan target maksimal 2 menit.
 - Proses debugging lebih sulit karena komunikasi melalui event.
 - Sistem harus memastikan event tidak hilang atau gagal diproses.
+- Urutan pemrosesan event perlu diperhatikan agar data tetap konsisten.
 
 ### 2.5 Kriteria Keberhasilan
 
@@ -70,7 +75,7 @@ Target sinkronisasi adalah maksimal 2 menit dengan 0 perbedaan data setelah pros
 |---|---|
 | Waktu sinkronisasi | ≤ 2 menit |
 | Perbedaan data setelah sinkronisasi | 0 |
-| Modul terkait menerima perubahan | Seluruh modul berlangganan |
+| Modul yang menerima perubahan | Seluruh modul terkait yang berlangganan |
 
 ---
 
@@ -81,28 +86,28 @@ Target sinkronisasi adalah maksimal 2 menit dengan 0 perbedaan data setelah pros
 | ID | ADR-02 |
 | Judul | Audit Trail dan Otorisasi Perubahan Dosen |
 | Status | Diterima (Accepted) |
-| Kategori | Keamanan dan Akuntabilitas |
-| Taktik terkait | Audit Trail dan RBAC |
+| Fokus | Keamanan dan akuntabilitas |
+| Taktik | Audit Trail dan RBAC + Persetujuan |
 
 ### 3.1 Konteks
 
-Pergantian dosen pengampu dapat menimbulkan permasalahan apabila tidak terdapat pencatatan mengenai siapa yang melakukan perubahan, kapan perubahan dilakukan, serta data apa yang diubah.
+Penggantian dosen pengampu dapat menimbulkan permasalahan apabila tidak terdapat pencatatan mengenai siapa yang melakukan perubahan, kapan perubahan dilakukan, serta data apa yang diubah.
 
-Selain itu, perubahan data dosen pengampu harus dibatasi agar tidak dapat dilakukan oleh pengguna yang tidak memiliki kewenangan.
+Selain itu, perubahan dosen pengampu harus dibatasi agar tidak dapat dilakukan oleh pengguna yang tidak memiliki kewenangan.
 
-Diperlukan mekanisme pengendalian akses dan pencatatan riwayat perubahan untuk memastikan setiap perubahan dapat dipertanggungjawabkan.
+Oleh karena itu, diperlukan mekanisme otorisasi dan pencatatan riwayat perubahan agar setiap perubahan data akademik dapat dikendalikan dan dipertanggungjawabkan.
 
 ### 3.2 Keputusan
 
-Menggunakan mekanisme **Role-Based Access Control (RBAC)** yang dilengkapi persetujuan ketua jurusan dan Audit Trail.
+Memilih mekanisme **Role-Based Access Control (RBAC)** yang dilengkapi persetujuan ketua jurusan dan Audit Trail.
 
-Ketentuan penerapannya:
+Ketentuan penerapannya adalah:
 
-1. Hanya admin akademik yang berwenang mengajukan dan melakukan perubahan dosen pengampu.
+1. Hanya admin akademik yang berwenang melakukan penggantian dosen pengampu.
 2. Perubahan harus memperoleh persetujuan ketua jurusan.
-3. Setiap perubahan dicatat dalam audit log.
-4. Catatan perubahan mencakup identitas pengguna, waktu perubahan, kelas yang diubah, dosen lama, dan dosen baru.
-5. Riwayat perubahan dapat ditelusuri kembali melalui sistem.
+3. Setiap perubahan yang dilakukan dicatat ke dalam audit log.
+4. Pencatatan mencakup identitas pengguna, waktu perubahan, kelas yang diubah, dosen lama, dan dosen baru.
+5. Riwayat perubahan dapat ditelusuri kembali untuk kebutuhan pemeriksaan.
 
 Target keamanan adalah 100% perubahan tercatat dan 0 perubahan tanpa izin.
 
@@ -110,20 +115,23 @@ Target keamanan adalah 100% perubahan tercatat dan 0 perubahan tanpa izin.
 
 | Alternatif | Penjelasan | Alasan Tidak Dipilih |
 |---|---|---|
-| Dosen atau prodi mengubah langsung | Perubahan dapat dilakukan oleh lebih banyak pihak | Risiko perubahan tanpa kewenangan lebih tinggi |
-| Log hanya di file server | Riwayat disimpan di luar mekanisme audit sistem | Penelusuran perubahan kurang terintegrasi |
-| RBAC + persetujuan + Audit Trail | Akses dibatasi dan perubahan dicatat dalam sistem | Dipilih karena lebih mudah dikendalikan dan diaudit |
+| Dosen atau prodi mengubah langsung | Perubahan dapat dilakukan oleh pihak lain tanpa mekanisme persetujuan yang ditentukan | Risiko perubahan tanpa kewenangan lebih tinggi |
+| Log hanya di file server | Riwayat perubahan disimpan di luar mekanisme audit sistem | Penelusuran perubahan kurang terintegrasi |
+| RBAC + persetujuan + Audit Trail | Akses dibatasi dan seluruh perubahan dicatat dalam sistem | Dipilih karena lebih mudah dikendalikan dan diaudit |
 
 ### 3.4 Konsekuensi
 
 **Kelebihan:**
+
 - Setiap perubahan memiliki jejak audit.
 - Identitas pengguna dan waktu perubahan dapat diketahui.
 - Mengurangi risiko perubahan data tanpa izin.
 - Meningkatkan akuntabilitas pengelolaan data akademik.
+- Memudahkan penelusuran apabila terjadi kesalahan perubahan data.
 
 **Kekurangan:**
-- Proses perubahan membutuhkan waktu lebih lama karena persetujuan.
+
+- Proses perubahan membutuhkan waktu lebih lama karena harus melalui persetujuan ketua jurusan.
 - Penyimpanan audit log menambah kebutuhan kapasitas database.
 - Proses pencatatan menambah beban penulisan data.
 
@@ -137,23 +145,27 @@ Target keamanan adalah 100% perubahan tercatat dan 0 perubahan tanpa izin.
 
 ---
 
-## 4. Hubungan ADR dengan Perancangan Arsitektur
+## 4. Hubungan Kedua ADR dengan Arsitektur Sistem
 
-Kedua ADR saling melengkapi dalam menyelesaikan permasalahan pergantian dosen pengampu pada SIAKAD UMI.
+Kedua keputusan arsitektur saling melengkapi dalam menangani permasalahan penggantian dosen pengampu pada subsistem Academic Management SIAKAD UMI.
 
-| Keputusan | Fokus | Atribut Kualitas |
+| Keputusan | Fokus Utama | Atribut Kualitas |
 |---|---|---|
-| ADR-01 | Penyebaran perubahan melalui event | Modifiabilitas |
+| ADR-01 | Penyebaran perubahan dosen melalui event | Modifiabilitas |
 | ADR-02 | Pembatasan akses dan pencatatan perubahan | Keamanan |
 
-ADR-01 memastikan perubahan dosen dapat disebarkan ke modul akademik terkait, sedangkan ADR-02 memastikan perubahan tersebut dilakukan oleh pihak yang berwenang dan memiliki riwayat yang dapat ditelusuri.
+ADR-01 memastikan perubahan dosen pengampu dapat disebarkan ke modul jadwal, KRS, presensi, dan nilai melalui event bus internal.
 
-Kedua keputusan diterapkan dalam rancangan pola Layered + Event-Driven, dengan database utama sebagai sumber data dan event bus internal sebagai mekanisme penyebaran perubahan.
+Sementara itu, ADR-02 memastikan perubahan hanya dilakukan oleh pihak yang berwenang serta memiliki riwayat yang dapat ditelusuri.
+
+Kedua keputusan tersebut diterapkan dalam rancangan pola **Layered + Event-Driven**, dengan database utama sebagai sumber data dan event bus internal sebagai mekanisme penyebaran perubahan.
 
 ## 5. Kesimpulan
 
-Berdasarkan kedua keputusan arsitektur tersebut, rancangan subsistem Academic Management SIAKAD UMI diharapkan mampu mengurangi ketidaksinkronan data akibat pergantian dosen pengampu.
+Berdasarkan kedua keputusan arsitektur tersebut, rancangan subsistem Academic Management SIAKAD UMI diharapkan dapat mengurangi keterlambatan penyebaran perubahan dosen pengampu dan ketidaksinkronan data akademik.
 
-Mekanisme Publish-Subscribe mendukung penyebaran perubahan secara otomatis, sedangkan RBAC dan Audit Trail memastikan perubahan dapat dikendalikan dan dipertanggungjawabkan.
+Mekanisme Publish-Subscribe mendukung penyebaran perubahan secara otomatis, sedangkan RBAC dan Audit Trail memastikan perubahan dapat dikendalikan serta dipertanggungjawabkan.
 
-Namun, seluruh target masih berupa kriteria desain dan belum dinyatakan tercapai melalui pengujian prototipe. Validasi lebih lanjut diperlukan untuk memastikan mekanisme sinkronisasi, otorisasi, dan pencatatan berjalan sesuai target.
+Namun, rancangan ini belum mencakup notifikasi langsung kepada mahasiswa. Mahasiswa masih perlu membuka kembali SIAKAD untuk melihat informasi dosen terbaru.
+
+Seluruh target yang ditetapkan masih berupa target rancangan dan belum divalidasi melalui pengujian prototipe.
