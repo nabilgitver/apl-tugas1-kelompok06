@@ -1,70 +1,74 @@
-
 # BAB 5: EVALUASI 
 ## [U6] Evaluasi Arsitektur
 
-Pada bab ini dijabarkan hasil evaluasi arsitektur subsistem *Academic Management* pada SIAKAD UMI (`siakad.umi.ac.id`) berdasarkan pohon utilitas mini, matriks trade-off berbobot, analisis metode ATAM (*Architecture Tradeoff Analysis Method*), serta ringkasan keputusan arsitektur utama. Evaluasi ini merujuk pada kerangka kerja Kazman et al. (2000) dan Bass et al. (2021) untuk memastikan konsistensi penuh dengan materi presentasi kelompok.
+Pada bab ini dievaluasi arsitektur subsistem *Academic Management* SIAKAD UMI (`siakad.umi.ac.id`) menggunakan pohon utilitas mini, matriks *trade-off* berbobot, analisis ala ATAM (*Architecture Tradeoff Analysis Method*), dan dua keputusan arsitektur utama (ADR). Evaluasi merujuk pada Kazman et al. (2000) dan Bass et al. (2021).
 
 ---
 
 ### 5.1 Pohon Utilitas Mini (*Utility Tree*)
 
-Pohon utilitas memetakan prioritas kualitas sistem terhadap skenario yang telah diuji. Setiap skenario dinilai berdasarkan tingkat kepentingan (*importance*) dan tingkat kesulitan implementasinya (*difficulty*).
+Setiap skenario dinilai berdasarkan kepentingan (*importance*) dan kesulitan (*difficulty*): H = High, M = Medium.
 
-| Skenario | Atribut Kualitas | Penilaian (Kepentingan, Kesulitan) | Deskripsi Target & Hasil |
+| Skenario | Atribut Kualitas | (Kepentingan, Kesulitan) | Target |
 |---|---|---|---|
-| **S1** | Modifiabilitas | (H, H) | Sinkronisasi data antar-modul $\le 2$ menit tercapai melalui pola *publish-subscribe*. |
-| **S2** | Usability | (H, M) | Tampilan dosen baru terlihat dalam $\le 1$ menit saat aplikasi dibuka ulang oleh mahasiswa. |
-| **S3** | Keamanan | (M, M) | 100% perubahan tercatat di *audit log* dengan otorisasi RBAC dan persetujuan ketua jurusan. |
+| **S1** | Modifiabilitas | (H, H) | Data sinkron $\le 2$ menit |
+| **S2** | Usability | (H, M) | Dosen baru terlihat $\le 1$ menit saat dibuka ulang |
+| **S3** | Keamanan | (M, M) | 100% perubahan tercatat |
 
 ---
 
 ### 5.2 Analisis *Trade-off* Berbobot
 
-Penilaian komparatif dilakukan untuk menentukan pilihan arsitektur terbaik antara alternatif **A** (Layered polos), **B** (Layered + *Event Bus* / *Publish-Subscribe* yang dipilih), dan **C** (*Microservices*). Penilaian menggunakan skala 1–5 berdasarkan bobot kriteria kelompok:
+Tiga alternatif dibandingkan: **A** (Layered polos), **B** (Layered + *Event Bus*, dipilih), dan **C** (*Microservices*). Skor 1–5 berdasarkan penilaian kelompok; untuk kriteria biaya, skor 5 berarti paling murah dan sederhana.
 
-| Kriteria Evaluasi | Bobot | Alternatif A (Layered Polos) | Alternatif B (Dipilih: Layered + Event Bus) | Alternatif C (Microservices) |
-|---|---|---|---|---|
-| **Modifiabilitas** | 35% | 2 | 4 | 5 |
-| **Usability** | 25% | 2 | 4 | 4 |
-| **Keamanan** | 20% | 2 | 4 | 4 |
-| **Biaya Rendah + Sederhana** | 20% | 5 | 4 | 1 |
-| **Total Skor Berbobot** | **100%** | **2,60** | **4,00** | **3,75** |
+| Kriteria (Bobot) | A | B (Dipilih) | C |
+|---|---|---|---|
+| **Modifiabilitas** (35%) | 2 | 4 | 5 |
+| **Usability** (25%) | 2 | 4 | 4 |
+| **Keamanan** (20%) | 2 | 4 | 4 |
+| **Biaya rendah + sederhana** (20%) | 5 | 4 | 1 |
+| **Total** | **2,60** | **4,00** | **3,75** |
 
-* **Kesimpulan Trade-off:** Alternatif B terpilih karena memberikan keseimbangan optimal antara fleksibilitas modifikasi subsistem dan tingkat kerumitan implementasi bagi tim pengembang, meskipun mengorbankan konsistensi seketika (*eventual consistency* dengan jeda $\le 2$ menit).
+Alternatif B dipilih karena paling seimbang antara kemudahan perubahan dan kesederhanaan bagi tim kecil. Analisis sensitivitas: C baru mengungguli B jika bobot Modifiabilitas lebih dari 3 kali bobot Biaya (saat ini 35% berbanding 20%).
 
 ---
 
-### 5.3 Analisis Metode ATAM (*Architecture Tradeoff Analysis Method*)
+### 5.3 Analisis ala ATAM
 
-Berdasarkan pendekatan evaluasi arsitektur ala ATAM (Kazman et al., 2000):
-
-* **Sensitivitas (*Sensitivity*):** Keandalan jaringan dan urutan pengiriman *event* pada *Event Bus* sangat menentukan konsistensi data di seluruh modul (Jadwal, KRS, Presensi, dan Nilai).
-* **Trade-off:** Penggunaan pola *Event Bus* memberikan fleksibilitas tinggi (*loose coupling*), namun menimbulkan *trade-off* berupa jeda waktu sinkronisasi (*eventual consistency* $\le 2$ menit).
-* **Risiko (*Risks*):** Potensi kegagalan pengiriman *event* di mana mahasiswa mungkin harus mengecek ulang secara mandiri apabila notifikasi otomatis belum terintegrasi secara penuh.
-* **Non-Risiko (*Non-Risks*):** Keberadaan satu sumber data master dosen dan audit log yang terpusat membuat penelusuran riwayat perubahan menjadi sangat mudah dan transparan.
+* **Sensitivitas:** Keandalan dan urutan *event* menentukan konsistensi data antar-modul.
+* **Trade-off:** *Event Bus* fleksibel (*loose coupling*), tetapi ada jeda sinkron ($\le 2$ menit).
+* **Risiko:** *Event* gagal terkirim; mahasiswa harus mengecek sendiri karena tidak ada notifikasi langsung.
+* **Non-risiko:** Satu sumber data dosen dan *audit log* membuat riwayat perubahan mudah ditelusuri.
 
 ---
 
 ### 5.4 Keputusan Arsitektur Utama (ADR)
 
-Ringkasan keputusan arsitektur (*Architecture Decision Records* / ADR) yang diterapkan dalam perancangan ini:
+1. **ADR-01: Sebar Perubahan Dosen via Event**
+   * **Status:** Diterima.
+   * **Konteks:** Data dosen dipakai banyak modul; perubahan manual rawan tidak sinkron.
+   * **Keputusan:** Simpan sekali, lalu publish event `DosenDiganti`; modul lain berlangganan.
+   * **Alternatif:** Panggilan langsung antarmodul; *microservices*.
+   * **Konsekuensi:** (+) Modul longgar, perubahan menyebar otomatis; (−) konsistensi akhir (jeda sinkron $\le 2$ menit).
 
-1. **ADR-01: Penyebaran Perubahan Dosen via Event (*Publish-Subscribe*)**
-   * **Status:** Diterima
-   * **Keluaran:** Data dosen dipakai banyak modul; perubahan manual rawan tidak sinkron. Keputusannya adalah menyimpan data sekali, lalu mempublikasikan event `DosenDiganti`.
-   * **Konsekuensi:** (+) Modul menjadi longgar (*loose coupling*) dan perubahan menyebar otomatis; (−) Memiliki jeda sinkronisasi $\le 2$ menit (*eventual consistency*).
-
-2. **ADR-02: *Audit Trail* dan Otorisasi Ketat**
-   * **Status:** Diterima
-   * **Keluaran:** Penggantian dosen sebelumnya tidak berjejak dan tidak jelas siapa yang berwenang. Keputusannya adalah membatasi hanya Admin Akademik dengan persetujuan Ketua Jurusan, serta mencatat seluruh aktivitas ke dalam log perubahan.
-   * **Konsekuensi:** (+) 100% terlacak dan tidak ada perubahan tanpa izin; (−) Proses birokrasi pengubahan data menjadi sedikit lebih lama.
+2. **ADR-02: *Audit Trail* dan Otorisasi**
+   * **Status:** Diterima.
+   * **Konteks:** Penggantian dosen tidak berjejak dan tidak jelas siapa yang berwenang.
+   * **Keputusan:** Hanya Admin Akademik dengan persetujuan Ketua Jurusan; semua perubahan dicatat.
+   * **Alternatif:** Dosen atau prodi mengubah langsung; log hanya di *file server*.
+   * **Konsekuensi:** (+) 100% terlacak, 0 perubahan tanpa izin; (−) proses lebih lama.
 
 ---
 
 ### 5.5 Kesimpulan Evaluasi
 
-Masalah utama terkait keterlambatan informasi penggantian dosen pengampu di detik-detik kuliah perdana **teratasi sebagian pada level desain**:
-* Dampak penggantian dosen tersebar otomatis ke modul terkait.
-* Informasi terbaru dapat dilihat mahasiswa saat SIAKAD dibuka ulang.
-* Seluruh tindakan tercatat secara transparan di dalam sistem.
-* *Catatan:* Notifikasi langsung secara *real-time* ke perangkat mahasiswa belum tercakup dalam fase perancangan ini dan menjadi poin rekomendasi untuk pengembangan prototipe berikutnya.
+Masalah utama **teratasi sebagian pada level desain**: dampak penggantian dosen tersebar otomatis, terlihat saat SIAKAD dibuka ulang, dan tercatat. Notifikasi langsung ke mahasiswa belum tercakup. Seluruh hasil masih target rancangan dan belum divalidasi dengan prototipe.
+
+---
+
+### 5.6 Saran
+
+1. Buat prototipe dan ukur waktu sinkron data ($\le 2$ menit).
+2. Uji apakah dosen baru langsung tampil saat SIAKAD dibuka ulang.
+3. Tambahkan notifikasi langsung ke mahasiswa.
+4. Pastikan *event* tidak hilang saat dikirim.
