@@ -1,7 +1,9 @@
 # BAB 3: TAKTIK
 ## [U3] Taktik Arsitektur
 
-Bab ini menjelaskan taktik arsitektur yang dirancang untuk mendukung ASR-1 sampai ASR-3 pada subsistem *Academic Management* SIAKAD UMI. Fokus rancangan adalah penggantian dosen pengampu menjelang kuliah perdana agar perubahan tersebar ke seluruh modul, dosen baru dapat dilihat saat mahasiswa membuka ulang SIAKAD, dan setiap perubahan hanya dapat dilakukan oleh pihak berwenang serta memiliki jejak audit.
+Bab ini menjelaskan taktik arsitektur yang dirancang untuk mendukung ASR-1 sampai ASR-3 pada subsistem *Academic Management* SIAKAD UMI. Fokus rancangan adalah penggantian dosen pengampu menjelang kuliah perdana agar perubahan tersebar secara konsisten ke seluruh modul, dosen baru dapat dilihat mahasiswa saat aplikasi dibuka ulang, dan setiap perubahan dibatasi serta memiliki jejak audit.
+
+Rancangan ini dibatasi pada masalah sinkronisasi data, tampilan dosen mutakhir, dan pencatatan keputusan. Sistem tidak menambahkan notifikasi langsung kepada mahasiswa; pembaruan dilakukan saat mahasiswa membuka ulang atau mengakses kembali SIAKAD.
 
 ---
 
@@ -9,9 +11,9 @@ Bab ini menjelaskan taktik arsitektur yang dirancang untuk mendukung ASR-1 sampa
 
 | ID Skenario | ASR | Atribut Kualitas | Taktik yang Digunakan | Tujuan Utama |
 |---|---|---|---|---|
-| **S1** | **ASR-1** | **Modifiabilitas** (*Modifiability*) | *Publish-Subscribe*, *Event Bus*, dan *Transactional Outbox* | Menyebarkan satu perubahan dosen secara konsisten ke Jadwal, KRS, Presensi, dan hak input Nilai dalam **maksimal 2 menit**. |
-| **S2** | **ASR-2** | **Usability** | *Publish-Subscribe* untuk pembaruan tampilan, *Cache Invalidation*, dan indikator sinkronisasi | Memastikan mahasiswa melihat dosen baru dalam **maksimal 1 menit** setelah membuka ulang SIAKAD dan tidak melihat dosen lama setelah sinkron selesai. |
-| **S3** | **ASR-3** | **Keamanan** (*Security*) | RBAC, pemisahan kewenangan dan persetujuan Ketua Jurusan, serta *Audit Trail* | Memastikan **100%** perubahan tercatat lengkap dan **0** perubahan berhasil tanpa izin. |
+| **S1** | **ASR-1** | **Modifiabilitas** (*Modifiability*) | *Publish-Subscribe*, *Event Bus*, dan *Transactional Outbox* | Menyebarkan satu perubahan dosen secara konsisten ke Modul Kelas-Dosen, Jadwal, KRS, Presensi, dan hak input Nilai dalam **maksimal 2 menit**. |
+| **S2** | **ASR-2** | **Usability** | *Publish-Subscribe* untuk pembaruan tampilan, *Cache Invalidation*, validasi sumber, dan indikator sinkronisasi | Memastikan mahasiswa melihat dosen baru dalam **maksimal 1 menit** setelah membuka ulang atau mengakses kembali SIAKAD, dengan **0 tampilan dosen lama** setelah sinkron selesai. |
+| **S3** | **ASR-3** | **Keamanan** (*Security*) | RBAC, pemisahan kewenangan dan persetujuan Ketua Jurusan, serta *Audit Trail* | Memastikan **100%** perubahan sah tercatat lengkap dan **0** perubahan berhasil diterapkan tanpa otorisasi serta persetujuan yang sah. |
 
 ---
 
@@ -19,14 +21,14 @@ Bab ini menjelaskan taktik arsitektur yang dirancang untuk mendukung ASR-1 sampa
 
 #### 3.2.1 Publish-Subscribe melalui Event Bus
 
-**Masalah yang diatasi:** Perubahan dosen pada satu kelas perlu memperbarui Modul Kelas-Dosen, Jadwal, KRS, Presensi, dan hak input Nilai. Pembaruan langsung satu per satu berisiko lama, berbeda antar-modul, dan sulit dipantau.
+**Masalah yang diatasi:** Perubahan dosen pada satu kelas perlu memperbarui Modul Kelas-Dosen, Jadwal, KRS, Presensi, dan hak input Nilai. Pembaruan langsung satu per satu berisiko lambat, berbeda antar-modul, dan dapat meninggalkan dosen lama pada modul tertentu.
 
 **Cara kerja:**
 1. Admin Akademik mengajukan pergantian dosen melalui Modul Kelas-Dosen.
 2. Sistem memvalidasi permintaan terhadap identitas, peran, dan persetujuan Ketua Jurusan.
 3. Jika valid, perubahan dosen disimpan satu kali pada sumber data utama sebagai satu transaksi perubahan.
 4. Sistem menerbitkan event `DosenDiganti` melalui *event bus*. Event membawa ID kelas, dosen lama, dosen baru, waktu perubahan, dan ID transaksi.
-5. Modul Jadwal, KRS, Presensi, dan Nilai berlangganan event tersebut lalu memperbarui data dan hak akses menjadi tanggung jawab masing-masing.
+5. Modul Jadwal, KRS, Presensi, dan Nilai berlangganan event tersebut, lalu memperbarui data atau hak akses menjadi tanggung jawab masing-masing.
 6. Setiap modul mengirimkan status berhasil atau gagal beserta waktu pemrosesan.
 
 **Taktik pendukung:**
@@ -36,8 +38,8 @@ Bab ini menjelaskan taktik arsitektur yang dirancang untuk mendukung ASR-1 sampa
 - **Pemantauan sinkronisasi:** Sistem mencatat waktu penerbitan dan waktu selesai pada setiap modul. Peringatan diberikan jika sinkronisasi mendekati atau melewati target 2 menit.
 
 **Ukuran keberhasilan:**
-- Semua modul terkait menerima dan memproses perubahan dalam waktu **maksimal 2 menit**.
-- Setelah sinkronisasi selesai, data dosen pada Jadwal, KRS, Presensi, dan Nilai **tidak berbeda**.
+- Semua modul terkait memproses perubahan dalam waktu **maksimal 2 menit**.
+- Setelah sinkronisasi selesai, data dosen pada Modul Kelas-Dosen, Jadwal, KRS, Presensi, dan hak input Nilai tidak berbeda.
 - Status pemrosesan dapat diperiksa untuk setiap modul berdasarkan ID transaksi.
 
 **Konsekuensi:**
@@ -54,8 +56,8 @@ Bab ini menjelaskan taktik arsitektur yang dirancang untuk mendukung ASR-1 sampa
 **Masalah yang diatasi:** Mahasiswa tidak menerima notifikasi langsung dan dapat melihat dosen lama apabila tampilan masih menggunakan cache lama atau belum menerima hasil sinkronisasi.
 
 **Cara kerja:**
-1. Setelah dosen diganti, event `DosenDiganti` digunakan untuk memperbarui atau membatalkan cache informasi Jadwal dan Informasi Kelas.
-2. Saat mahasiswa membuka ulang halaman Jadwal atau Informasi Kelas, aplikasi meminta data terbaru dari sumber resmi.
+1. Setelah dosen diganti, event `DosenDiganti` digunakan untuk memperbarui atau membatalkan cache informasi pada tampilan Jadwal dan Informasi Kelas.
+2. Saat mahasiswa membuka ulang atau mengakses kembali halaman Jadwal atau Informasi Kelas, aplikasi meminta data terbaru dari sumber resmi.
 3. Aplikasi membandingkan versi atau waktu pembaruan data cache dengan sumber resmi sebelum menampilkan hasil.
 4. Respons menampilkan dosen terbaru beserta waktu pembaruan terakhir.
 5. Jika sinkronisasi masih berjalan, aplikasi menampilkan status pembaruan dan tidak menyatakan bahwa data lama telah diperbarui.
@@ -63,11 +65,11 @@ Bab ini menjelaskan taktik arsitektur yang dirancang untuk mendukung ASR-1 sampa
 **Taktik pendukung:**
 - Gunakan masa berlaku cache terbatas untuk informasi dosen dan jadwal.
 - Lakukan *cache invalidation* berdasarkan event perubahan atau versi data.
-- Gunakan pola *latest data*/validasi sumber saat halaman dibuka ulang.
+- Gunakan validasi sumber resmi saat halaman dibuka ulang atau dimuat kembali.
 - Tampilkan indikator waktu pembaruan agar mahasiswa dapat mengenali kesegaran data.
 
 **Ukuran keberhasilan:**
-- Dosen baru terlihat dalam waktu **maksimal 1 menit** setelah mahasiswa membuka ulang SIAKAD, dengan asumsi sinkronisasi S1 telah selesai.
+- Dosen baru terlihat dalam waktu **maksimal 1 menit** setelah mahasiswa membuka ulang atau mengakses kembali SIAKAD, dengan asumsi sinkronisasi S1 telah selesai.
 - Setelah sinkronisasi selesai, **0 tampilan dosen lama** pada Jadwal dan Informasi Kelas.
 - Jika sinkronisasi belum selesai, aplikasi menampilkan status yang informatif dan bukan dosen lama seolah-olah sebagai data terbaru.
 
@@ -99,7 +101,7 @@ Bab ini menjelaskan taktik arsitektur yang dirancang untuk mendukung ASR-1 sampa
 
 #### 3.4.2 Audit Trail
 
-**Cara kerja:** Setiap perubahan sah dicatat pada tabel `LogPerubahan` sebagai audit trail. Catatan berisi sekurang-kurangnya:
+**Cara kerja:** Setiap perubahan sah dicatat pada tabel `LogPerubahan` sebagai *audit trail*. Catatan berisi sekurang-kurangnya:
 - identitas aktor yang mengajukan perubahan;
 - identitas Ketua Jurusan yang memberikan persetujuan;
 - waktu pengajuan, persetujuan, dan penerapan;
@@ -126,8 +128,8 @@ Catatan dibuat secara *append-only* sehingga tidak dapat diubah melalui fungsi a
 1. Admin Akademik mengajukan perubahan dosen pada Modul Kelas-Dosen.
 2. Sistem memeriksa RBAC dan memastikan persetujuan Ketua Jurusan telah diberikan. Jika gagal, permintaan ditolak, dicatat, dan event tidak diterbitkan.
 3. Jika valid, sistem menyimpan perubahan dosen, mencatat `LogPerubahan`, dan mencatat event `DosenDiganti` dalam tabel *outbox* dalam satu transaksi.
-4. *Event bus* menyebarkan event kepada Jadwal, KRS, Presensi, dan modul Nilai. Modul penerima memproses event secara idempoten serta mengirimkan status pemrosesan.
+4. *Event bus* menyebarkan event kepada Modul Jadwal, KRS, Presensi, dan Nilai. Modul penerima memproses event secara idempoten serta mengirimkan status pemrosesan.
 5. Sistem memantau sinkronisasi hingga seluruh modul selesai dengan target **maksimal 2 menit**.
-6. Mahasiswa yang membuka ulang SIAKAD mendapatkan dosen baru melalui cache yang telah dipakai atau divalidasi dari sumber resmi, dengan target tampilan **maksimal 1 menit** setelah sinkronisasi selesai.
+6. Mahasiswa yang membuka ulang atau mengakses kembali SIAKAD mendapatkan dosen baru melalui cache yang telah diperbarui atau divalidasi dari sumber resmi, dengan target tampilan **maksimal 1 menit** setelah sinkronisasi selesai.
 
-Dengan kombinasi taktik tersebut, satu perubahan dosen dapat disebarkan secara terkontrol, ditampilkan secara mutakhir kepada mahasiswa, dan dibatasi serta dicatat sesuai kebutuhan keamanan. Rancangan ini menjawab masalah data tidak sinkron, tampilan dosen lama, dan tidak adanya jejak keputusan pada penggantian dosen menjelang kuliah perdana.
+Dengan kombinasi taktik tersebut, satu perubahan dosen dapat disebarkan secara terkontrol, ditampilkan secara mutakhir kepada mahasiswa, dan dibatasi serta dicatat sesuai kebutuhan keamanan. Rancangan ini menjawab masalah sinkronisasi data, tampilan dosen lama, dan tidak adanya jejak keputusan pada pergantian dosen menjelang kuliah perdana.
