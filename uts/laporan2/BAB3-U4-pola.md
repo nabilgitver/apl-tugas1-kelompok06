@@ -1,21 +1,23 @@
 # BAB 3: POLA ARSITEKTUR
 ## [U4] Pola Arsitektur
 
-Pada bab ini dijelaskan pola arsitektur yang digunakan untuk mendukung skenario atribut kualitas pada subsistem *Academic Management* SIAKAD UMI. Fokus utama pola ini adalah menangani masalah penggantian dosen pengampu yang tidak konsisten, tidak terdokumentasi dengan baik, dan tidak disampaikan ke mahasiswa secara tepat waktu. Dengan menerapkan pola yang sesuai, proses perubahan dapat dilakukan secara terkontrol, terdokumentasi, dan mudah dikembangkan di masa mendatang.
+Pada bab ini dijelaskan pola arsitektur yang digunakan untuk mendukung ASR-1 sampai ASR-3 pada subsistem *Academic Management* SIAKAD UMI. Fokus rancangan adalah penggantian dosen pengampu menjelang kuliah perdana agar data tersebar secara konsisten, dosen baru terlihat saat mahasiswa membuka ulang SIAKAD, dan seluruh perubahan terlindungi serta tercatat.
+
+Rancangan dibatasi pada sinkronisasi data, tampilan dosen mutakhir, serta otorisasi dan pencatatan perubahan. Sistem tidak menyediakan notifikasi langsung kepada mahasiswa; mahasiswa memperoleh pembaruan ketika membuka ulang atau mengakses kembali SIAKAD.
 
 ---
 
 ### 3.1 Pola Arsitektur yang Dipilih
 
-Berdasarkan kebutuhan sistem, dipilih tiga pola arsitektur utama yang saling melengkapi:
+Berdasarkan kebutuhan ASR-1 sampai ASR-3, dipilih tiga pola arsitektur utama yang saling melengkapi:
 
-| Pola | Deskripsi | Kebutuhan yang Didukung | Dampak utama |
+| Pola | Deskripsi | Kebutuhan yang Didukung | Dampak Utama |
 |---|---|---|---|
-| **Layered Architecture** | Memisahkan antarmuka, logika aplikasi, dan penyimpanan data ke dalam lapisan yang jelas. | Keteraturan pengelolaan data dan kemudahan pemeliharaan. | Modul menjadi lebih mudah dikembangkan dan diuji. |
-| **Event-Driven Architecture** | Perubahan data dikirimkan melalui event agar modul terkait menerima update secara otomatis. | Sinkronisasi data antar modul dan kebutuhan *modifiability*. | Terjadi *eventual consistency* sementara proses sinkronisasi berlangsung. |
-| **RBAC + Audit Trail** | Hak akses dibatasi per peran dan semua perubahan dicatat dalam log audit yang aman. | Keamanan, akuntabilitas, dan audit perubahan. | Proses perubahan menjadi lebih formal dan sedikit lebih lama. |
+| **Layered Architecture** | Memisahkan antarmuka, logika aplikasi, domain akademik, dan penyimpanan data ke dalam lapisan yang jelas. | Struktur pemeliharaan, konsistensi aturan, dan integrasi modul. | Keteraturan meningkat, tetapi komunikasi antar-lapisan dapat menambah overhead. |
+| **Event-Driven Architecture** | Perubahan dosen diterbitkan sebagai event dan diterima oleh modul terkait melalui event bus. | Sinkronisasi **S1** dalam maksimal 2 menit serta pembaruan tampilan **S2** dalam maksimal 1 menit setelah sinkron selesai. | Terjadi *eventual consistency* sementara, sehingga memerlukan outbox, retry, idempotensi, dan pemantauan. |
+| **RBAC + Audit Trail** | Hak akses dibatasi berdasarkan peran, persetujuan dipisahkan dari pengajuan, dan perubahan dicatat secara append-only. | Keamanan **S3**: 100% perubahan tercatat dan 0 perubahan berhasil tanpa otorisasi serta persetujuan sah. | Proses menjadi lebih formal dan kebutuhan penyimpanan serta beban administrasi bertambah. |
 
-*Table 4. Pola arsitektur yang digunakan pada subsistem Academic Management.*
+*Tabel 4. Pola arsitektur pada subsistem Academic Management SIAKAD UMI.*
 
 ---
 
@@ -23,40 +25,42 @@ Berdasarkan kebutuhan sistem, dipilih tiga pola arsitektur utama yang saling mel
 
 #### 3.2.1 Struktur lapisan
 
-Sistem dibagi menjadi beberapa lapisan utama, yaitu:
+Sistem dibagi menjadi empat lapisan utama:
 
 1. **Lapisan presentasi (Presentation Layer)**
-   - Menyediakan antarmuka web untuk admin akademik, dosen, dan mahasiswa.
-   - Menampilkan jadwal, informasi kelas, presensi, nilai, dan status perubahan dosen.
+   - Menyediakan antarmuka web untuk Admin Akademik, Ketua Jurusan, dosen, dan mahasiswa.
+   - Menampilkan pengajuan perubahan, persetujuan, jadwal, informasi kelas, presensi, nilai, serta status sinkronisasi.
 
 2. **Lapisan aplikasi (Application Layer)**
-   - Menangani logika bisnis seperti pengajuan perubahan dosen, validasi data, persetujuan, dan pengiriman event.
-   - Menghubungkan kebutuhan pengguna dengan layanan backend.
+   - Menangani pengajuan perubahan dosen, autentikasi, otorisasi, persetujuan, penerbitan event, dan pemantauan status.
+   - Menghubungkan kebutuhan pengguna dengan layanan domain dan penyimpanan data.
 
-3. **Lapisan domain / bisnis (Domain Layer)**
-   - Memuat aturan inti perusahaan akademik, seperti validasi kelas, relasi dosen dengan mata kuliah, serta kebijakan perubahan dosen.
-   - Menjadi tempat aturan yang paling penting bagi konsistensi data akademik.
+3. **Lapisan domain atau bisnis (Domain Layer)**
+   - Memuat aturan kelas, relasi dosen dan mata kuliah, kewenangan peran, persetujuan Ketua Jurusan, dan aturan perubahan dosen.
+   - Menjadi pusat aturan yang menjamin satu alur perubahan digunakan secara konsisten oleh seluruh modul.
 
 4. **Lapisan data (Data Layer)**
-   - Menyimpan data kelas, jadwal, KRS, presensi, nilai, log perubahan, dan catatan outbox event.
-   - Menyediakan akses data yang aman dan konsisten untuk seluruh modul.
+   - Menyimpan data kelas, jadwal, KRS, presensi, nilai, `LogPerubahan`, status persetujuan, dan tabel *outbox*.
+   - Menyediakan akses data yang aman dan konsisten untuk lapisan aplikasi.
 
-#### 3.2.2 Keunggulan pola ini
+#### 3.2.2 Keunggulan pola
 
-- **Pemisahan tanggung jawab:** setiap lapisan punya tugas yang jelas dan tidak bercampur.
-- **Kemudahan pemeliharaan:** perubahan pada satu lapisan dapat dilakukan dengan risiko yang lebih kecil terhadap lapisan lain.
-- **Skalabilitas pengembangan:** modul seperti Jadwal, Presensi, KRS, dan Nilai dapat dikembangkan secara terpisah tanpa mengganggu fungsi lain.
-- **Konsistensi kepatuhan aturan bisnis:** semua perubahan dosen melewati satu alur logika yang sama.
+- Pemisahan tanggung jawab membuat perubahan pada satu lapisan tidak harus mengubah seluruh modul.
+- Aturan penggantian dosen dapat dipelihara secara terpusat pada lapisan domain.
+- Modul Jadwal, KRS, Presensi, dan Nilai dapat dikembangkan secara terpisah tanpa mengubah aturan inti.
+- Tim pengelola dapat menelusuri kegagalan berdasarkan lapisan dan tanggung jawabnya.
 
 #### 3.2.3 Keterkaitan dengan masalah utama
 
-Masalah utama dalam kasus ini adalah perubahan dosen pengampu tidak tersebar dengan benar dan mahasiswa tidak diberi tahu. Dengan layered architecture, proses penggantian dosen diproses melalui satu titik logika utama, sehingga koreksi tidak perlu dilakukan di setiap modul secara manual. Hal ini menurunkan risiko inkonsistensi data dan memudahkan pengawasan alur perubahan.
+Dengan *Layered Architecture*, penggantian dosen diproses melalui lapisan aplikasi dan domain yang sama, bukan melalui pembaruan langsung pada setiap modul. Setelah perubahan disetujui dan disimpan, lapisan aplikasi menerbitkan event untuk memperbarui modul akademik yang terdampak.
+
+Pemisahan ini mendukung modifiabilitas karena satu perubahan dosen tidak perlu diimplementasikan berulang pada setiap modul. Lapisan presentasi juga dapat menampilkan status sinkronisasi atau data yang belum siap tanpa menyatakan bahwa dosen lama adalah data terbaru.
 
 #### 3.2.4 Konsekuensi
 
-- Arsitektur ini membutuhkan desain antarmuka antar-lapisan yang jelas.
-- Komunikasi antar lapisan dapat menambah overhead jika tidak dirancang dengan baik.
-- Jika modul baru ditambahkan, struktur lapisan tetap harus dipelihara agar tidak menimbulkan “spaghetti architecture”.
+- Dibutuhkan kontrak antarmuka yang jelas antara lapisan presentasi, aplikasi, domain, dan data.
+- Komunikasi berlapis dapat menambah *overhead* bila tidak dirancang efisien.
+- Perubahan struktur lapisan atau penambahan modul baru tetap harus mengikuti batas tanggung jawab agar tidak membentuk arsitektur yang sulit dipelihara.
 
 ---
 
@@ -64,43 +68,42 @@ Masalah utama dalam kasus ini adalah perubahan dosen pengampu tidak tersebar den
 
 #### 3.3.1 Tujuan pola
 
-Sistem akademik memiliki banyak modul yang bergantung pada informasi dosen pengampu, seperti:
-- Jadwal
-- KRS
-- Presensi
-- Nilai
-- Informasi kelas mahasiswa
+Banyak modul bergantung pada informasi dosen pengampu, yaitu Modul Kelas-Dosen, Jadwal, KRS, Presensi, Nilai, dan tampilan Informasi Kelas mahasiswa. Ketika dosen diganti, perubahan harus disebarkan secara otomatis tanpa membuat satu modul mengendalikan pembaruan setiap modul lainnya.
 
-Ketika dosen pengampu berubah, perubahan harus disebarkan ke seluruh modul terkait secara otomatis. Karena modul-modul ini berbeda dan tidak selalu terikat dengan kode yang sama, pola event-driven sangat sesuai.
+Pola event-driven dipilih untuk mendukung:
+- **S1:** semua modul selesai memproses dalam maksimal 2 menit dan 0 data berbeda setelah sinkronisasi.
+- **S2:** mahasiswa melihat dosen baru dalam maksimal 1 menit setelah membuka ulang atau mengakses kembali SIAKAD, dengan asumsi sinkronisasi S1 telah selesai.
 
 #### 3.3.2 Cara kerja pola
 
-1. Admin Akademik melakukan perubahan dosen pada modul *Kelas-Dosen*.
-2. Sistem menyimpan perubahan pada sumber data utama dan menuliskan event `DosenDiganti` ke tabel *outbox* dalam satu transaksi.
-3. Event kemudian dikirim melalui *event bus* atau broker event.
-4. Modul seperti Jadwal, KRS, Presensi, dan Nilai berlangganan event tersebut.
-5. Setiap modul memproses event dan memperbarui data yang relevan.
-6. Jika terjadi kegagalan pada salah satu modul, sistem melakukan retry dan mencatat status proses.
+1. Admin Akademik mengajukan penggantian dosen melalui Modul Kelas-Dosen.
+2. Sistem memeriksa RBAC dan persetujuan Ketua Jurusan.
+3. Jika valid, perubahan disimpan pada sumber data utama dan catatan `LogPerubahan` serta event `DosenDiganti` ditulis dalam satu transaksi.
+4. Event dicatat pada tabel *outbox* lalu diterbitkan melalui *event bus*.
+5. Modul Jadwal, KRS, Presensi, dan Nilai berlangganan event dan memperbarui data atau hak akses masing-masing.
+6. Modul Tampilan Mahasiswa membatalkan atau memperbarui cache yang terdampak.
+7. Setiap modul mengirim status berhasil atau gagal beserta waktu pemrosesan.
 
 #### 3.3.3 Taktik pendukung
 
-Pola ini didukung oleh beberapa mekanisme tambahan:
-- **Transactional Outbox**: mencegah event dan data mutasi kehilangan keterkaitan.
-- **Idempotency**: event yang diterima berkali-kali tidak menghasilkan perubahan ganda.
-- **Retry mechanism**: event gagal diproses akan dicoba lagi secara berkala.
-- **Monitoring status**: seluruh modul dipantau agar sinkronisasi selesai dalam target waktu.
+- **Transactional Outbox:** perubahan dan pencatatan event memiliki keterikatan atomik sehingga perubahan tidak tersimpan tanpa event yang tercatat.
+- **Idempotency:** event diproses berdasarkan ID unik agar retry tidak menghasilkan perubahan ganda.
+- **Retry dengan jeda bertahap:** event gagal dicoba kembali dengan interval bertahap.
+- **Dead-letter atau antrean kegagalan:** event yang terus gagal dipisahkan dan memicu peringatan operasional.
+- **Monitoring status:** waktu penerbitan dan pemrosesan setiap modul dipantau terhadap target 2 menit.
+- **Cache invalidation:** event digunakan untuk memperbarui atau membatalkan cache Jadwal dan Informasi Kelas.
 
 #### 3.3.4 Hubungan dengan skenario kualitas
 
-Pola event-driven berkontribusi pada:
-- **S1 (Modifiabilitas)**: perubahan dapat disebarkan ke banyak modul tanpa menulis ulang logika di semua bagian.
-- **S2 (Usability)**: mahasiswa bisa melihat data terbaru ketika membuka ulang aplikasi setelah informasi kelas diperbarui.
+- **S1—Modifiabilitas:** satu perubahan diterbitkan sebagai satu event dan diterima oleh seluruh modul tanpa pembaruan silang yang kompleks.
+- **S2—Usability:** cache atau tampilan dapat diperingan dan divalidasi terhadap sumber resmi sehingga mahasiswa melihat dosen baru setelah membuka ulang SIAKAD.
+- **Target tampilan:** dosen baru maksimal 1 menit setelah sinkron S1 selesai; jika sinkronisasi belum selesai, indikator status ditampilkan dan dosen lama tidak dinyatakan sebagai data terbaru.
 
 #### 3.3.5 Konsekuensi
 
-- Terdapat keterlambatan sementara (*eventual consistency*) sebelum semua modul selesai diperbarui.
-- Perlu pengelolaan log, retry, dan monitoring untuk memastikan tidak ada event yang tertinggal.
-- Struktur arsitektur menjadi lebih kompleks dibandingkan pendekatan sinkron langsung.
+- Sinkronisasi bersifat *eventual consistency* selama event diproses, sehingga seluruh modul belum tentu langsung sama pada waktu yang sama.
+- Sistem memerlukan mekanisme outbox, retry, antrean kegagalan, monitoring, dan pemulihan.
+- Debugging alur event dan operasional komponen asinkron lebih kompleks dibanding pembaruan sinkron langsung.
 
 ---
 
@@ -108,76 +111,77 @@ Pola event-driven berkontribusi pada:
 
 #### 3.4.1 Tujuan pola
 
-Perubahan dosen pengampu merupakan operasi kritis yang memengaruhi proses akademik, hak akses, serta reputasi pengajaran. Oleh karena itu, perubahan hanya boleh dilakukan oleh pihak yang berwenang dan harus dicatat secara permanen.
+Penggantian dosen memengaruhi jadwal, hak mengajar, KRS, presensi, nilai, dan reputasi akademik. Karena itu, perubahan hanya boleh diajukan oleh pihak berwenang, disetujui oleh pihak yang terpisah, diterapkan setelah pemeriksaan, dan dicatat lengkap.
+
+Pola ini mendukung S3 dengan memastikan:
+- **100%** perubahan sah tercatat pada *Audit Trail*.
+- **0** perubahan berhasil diterapkan tanpa RBAC dan persetujuan Ketua Jurusan yang sah.
+- Upaya tanpa kewenangan ditolak dan dapat ditelusuri.
 
 #### 3.4.2 Komponen utama
 
-Pola keamanan ini terdiri dari beberapa bagian:
-
 1. **RBAC (Role-Based Access Control)**
    - Admin Akademik berhak mengajukan perubahan dosen.
-   - Ketua Jurusan berhak menyetujui perubahan.
+   - Ketua Jurusan berhak menyetujui penggantian.
    - Dosen lama dan dosen baru tidak dapat mengubah data secara sepihak.
+   - Hak akses diterapkan dengan prinsip *least privilege* dan *default-deny*.
 
-2. **Persetujuan ganda / workflow**
-   - Setiap perubahan dimulai dari pengajuan.
-   - Setelah validasi, perubahan harus disetujui sebelum diterapkan.
+2. **Pemisahan kewenangan dan persetujuan**
+   - Setiap perubahan dimulai sebagai permintaan berstatus menunggu persetujuan.
+   - Pemohon tidak dapat menyetujui permintaan miliknya sendiri.
+   - Sistem memeriksa identitas, peran, status persetujuan, dan validitas permintaan sebelum menerapkan perubahan.
 
-3. **Audit trail / log perubahan**
-   - Mencatat siapa yang mengubah, kapan, apa yang berubah, dan alasan perubahan.
-   - Log dibuat secara *append-only* agar tidak mudah diubah oleh pengguna biasa.
+3. **Audit trail dan log perubahan**
+   - `LogPerubahan` mencatat identitas aktor, Ketua Jurusan yang menyetujui, waktu pengajuan, persetujuan dan penerapan, kelas atau mata kuliah, dosen lama, dosen baru, hasil tindakan, serta alasan penolakan.
+   - Catatan bersifat *append-only* dan aksesnya dibatasi pada peran berwenang.
 
 #### 3.4.3 Alur keamanan
 
-1. Pengguna masuk ke sistem dan autentikasi dilakukan.
-2. Sistem memeriksa peran pengguna.
-3. Hanya pengguna dengan role yang sah yang dapat mengajukan perubahan.
-4. Permintaan dikirim ke proses persetujuan.
-5. Setelah disetujui, data yang berubah dicatat pada audit trail.
-6. Semua status pengajuan dan hasil keputusan disimpan dalam log keamanan.
+1. Pengguna melakukan autentikasi identitas.
+2. Sistem memeriksa peran pengguna dengan kebijakan *default-deny*.
+3. Admin Akademik mengajukan perubahan; pengguna tanpa kewenangan ditolak dan dicatat.
+4. Ketua Jurusan memberikan persetujuan terpisah dari pengajuan.
+5. Sistem memeriksa kembali identitas, peran, validitas permintaan, dan persetujuan sebelum menyimpan perubahan.
+6. Permintaan sah dicatat pada `LogPerubahan` dan penerbitan event baru dilakukan dalam transaksi yang sama dengan perubahan.
 
-#### 3.4.4 Keterkaitan dengan skenario kualitas
+#### 3.4.4 Hubungan dengan skenario kualitas
 
-Pola ini berkontribusi pada:
-- **S3 (Keamanan)**: mencegah perubahan ilegal dan menyediakan jejak audit yang jelas.
-- **Kepatuhan terhadap aturan akademik**: perubahan dosen tidak dilakukan secara sewenang-wenang.
+- **S3—Keamanan:** perubahan ilegal dicegah dan setiap keputusan dapat diaudit.
+- **Akuntabilitas:** pengguna dapat mengetahui siapa yang mengajukan, siapa yang menyetujui, kapan perubahan diterapkan, serta nilai lama dan baru.
+- **Kepatuhan:** konfigurasi peran harus diperbarui sesuai struktur jabatan agar kewenangan tetap valid.
 
 #### 3.4.5 Konsekuensi
 
-- Proses perubahan menjadi lebih formal dan membutuhkan waktu lebih lama.
-- Perlunya penyimpanan tambahan untuk log audit.
-- Admin sistem harus menjaga kebijakan peran agar tetap sesuai dengan struktur organisasi.
+- Alur perubahan menjadi lebih panjang karena memerlukan persetujuan.
+- Penyimpanan, beban tulis, retensi, dan pengelolaan akses log audit bertambah.
+- Kebijakan peran dan pemisahan kewenangan harus dijaga agar tidak tumpang tindih atau kedaluwarsa.
 
 ---
 
 ### 3.5 Integrasi Pola Arsitektur
 
-Ketiga pola di atas tidak berdiri sendiri, tetapi saling melengkapi dalam satu ekosistem arsitektur sistem. Integrasi utamanya adalah sebagai berikut:
+Ketiga pola saling melengkapi dalam satu alur perubahan dosen:
 
-1. **Lapisan arsitektur** membagi tanggung jawab sistem agar logika bisnis dan data tidak bercampur.
-2. **Event-driven architecture** memastikan bahwa perubahan dosen diteruskan ke seluruh modul yang terdampak sesuai kebutuhan.
-3. **RBAC dan audit trail** melindungi integritas proses perubahan agar tidak terjadi perubahan ilegal atau tidak betanggung jawab.
+1. Lapisan presentasi menerima pengajuan dari Admin Akademik.
+2. Lapisan aplikasi dan domain memeriksa otorisasi serta persetujuan Ketua Jurusan.
+3. Permintaan yang ditolak tidak diterapkan dan dicatat dalam log keamanan.
+4. Jika valid, lapisan data menyimpan perubahan, mencatat `LogPerubahan`, dan menulis event `DosenDiganti` ke tabel *outbox* dalam satu transaksi.
+5. *Event bus* mengirim event kepada Jadwal, KRS, Presensi, dan Nilai.
+6. Modul penerima memproses event secara idempotent dan mengirim status proses; target sinkronisasi adalah maksimal 2 menit.
+7. Cache atau tampilan informasi kelas diperbarui atau divalidasi sehingga dosen baru dapat terlihat maksimal 1 menit setelah mahasiswa membuka ulang SIAKAD dan sinkronisasi selesai.
 
-Secara ringkas, alur perubahan dosen pada sistem menjadi:
-
-1. Admin akademik mengajukan perubahan.
-2. Sistem mengecek otorisasi dan persetujuan.
-3. Jika valid, perubahan disimpan di sumber data utama.
-4. Event `DosenDiganti` diterbitkan ke event bus.
-5. Modul terkait memperbarui data masing-masing.
-6. Log perubahan dibuat dan dipertahankan untuk audit.
-7. Mahasiswa melihat data terbaru setelah aplikasi dibuka ulang atau data berhasil disinkronkan.
+Dengan integrasi tersebut, *Layered Architecture* membentuk struktur pemeliharaan, *Event-Driven Architecture* mendukung penyebaran perubahan dan tampilan mutakhir, sedangkan RBAC dan *Audit Trail* melindungi otoritas serta ketertelusuran keputusan.
 
 ---
 
 ### 3.6 Kesimpulan
 
-Pola arsitektur yang dipilih untuk subsistem *Academic Management* SIAKAD UMI adalah kombinasi dari:
-- **Layered Architecture** untuk struktur dan pemeliharaan,
-- **Event-Driven Architecture** untuk sinkronisasi data antar modul,
-- **RBAC + Audit Trail** untuk keamanan dan akuntabilitas.
+Pola arsitektur yang dipilih untuk subsistem *Academic Management* SIAKAD UMI adalah kombinasi:
+- **Layered Architecture** untuk pemisahan tanggung jawab dan kemudahan pemeliharaan,
+- **Event-Driven Architecture** untuk sinkronisasi data antar-modul dalam maksimal 2 menit,
+- **RBAC + Audit Trail** untuk memastikan 0 perubahan ilegal dan 100% perubahan tercatat.
 
-Kombinasi ini sesuai dengan kebutuhan utama sistem, yaitu menjaga konsistensi data dosen pengampu, mempercepat penyebaran perubahan, memberi informasi kepada mahasiswa, dan menjaga bahwa setiap perubahan dapat dipertanggungjawabkan secara administratif. Dengan pola seperti ini, sistem dapat berkembang lebih terstruktur, aman, dan mudah diadaptasi terhadap perubahan di masa depan.
+Kombinasi pola ini menjawab masalah utama, yaitu data dosen yang tidak sinkron, tampilan dosen lama ketika mahasiswa membuka ulang SIAKAD, dan tidak adanya jejak keputusan pada penggantian dosen menjelang kuliah perdana.
 
 ---
 
