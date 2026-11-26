@@ -1,7 +1,5 @@
 # Daftar Pustaka
 
-> Catatan: nomor [4]–[7] bersifat sementara, akan diurutkan ulang menurut kemunculan pertama di laporan setelah BAB II–V selesai.
-
 [1] Universitas Muslim Indonesia, "SIAKAD UMI," 2026. [Online]. Available: https://siakad.umi.ac.id. [Accessed: Nov. 11, 2026].
 
 [2] L. Bass, P. Clements, and R. Kazman, *Software Architecture in Practice*, 4th ed. Boston, MA, USA: Addison-Wesley, 2021.
